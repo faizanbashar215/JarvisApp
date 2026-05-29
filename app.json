@@ -16,7 +16,7 @@
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "package": "com.faizanbashar215.JarvisApp"
+      "package": "com.faizanbashar215.jarvis"
     },
     "web": {
       "favicon": "./assets/favicon.png"
