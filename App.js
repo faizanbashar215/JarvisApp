@@ -5,7 +5,6 @@ import {
   PanResponder, Platform, KeyboardAvoidingView, Modal,
   Vibration, Linking, FlatList
 } from "react-native";
-import { WebView } from "react-native-webview";
 
 const { width, height } = Dimensions.get("window");
 const API = "http://10.148.123.146:8000";
@@ -331,7 +330,7 @@ function ActionScreen({ visible, steps, result, onClose, webUrl }) {
         <View style={styles.hudLine} />
 
         {showWeb && webUrl ? (
-          <WebView source={{ uri: webUrl }} style={{ flex: 1 }} />
+          <Text style={{color: C.blue, fontFamily: "monospace", padding: 16}}>{webUrl}</Text>
         ) : (
           <ScrollView style={{ flex: 1, padding: 16 }}>
             {/* Steps */}
