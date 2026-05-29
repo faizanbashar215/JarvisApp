@@ -7,7 +7,7 @@ import {
 } from "react-native";
 
 const { width, height } = Dimensions.get("window");
-const API = "http://10.148.123.146:8000";
+const API = "http://10.131.74.164:8000";
 
 const C = {
   bg: "#000510",
