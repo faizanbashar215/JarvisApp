@@ -4,7 +4,7 @@ import {
   ScrollView, StatusBar, ActivityIndicator, SafeAreaView
 } from "react-native";
 
-const API = "http://localhost:8000";
+const API = "http://10.148.123.146:8000";
 
 export default function App() {
   const [messages, setMessages] = useState([
