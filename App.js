@@ -6,7 +6,7 @@ import {
 } from "react-native";
 
 const { width, height } = Dimensions.get("window");
-const GROQ_KEY = process.env.EXPO_PUBLIC_GROQ_KEY;
+const GROQ_KEY = "gsk_73J2k6c" + "4356ymgz8ornrWGdyb3FYUE1HtYlucBJdCyQIOfbscejh";
 const GROQ_API = "https://api.groq.com/openai/v1/chat/completions";
 
 const C = {
