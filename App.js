@@ -6,7 +6,8 @@ import {
 } from "react-native";
 
 const { width, height } = Dimensions.get("window");
-const API = "http://127.0.0.1:8000";
+const DEFAULT_IP = "10.139.106.157";
+let API = `http://${DEFAULT_IP}:8000`;
 
 const C = {
   bg: "#000510", blue: "#00D4FF", green: "#00FF88",
@@ -474,6 +475,14 @@ export default function App() {
     setLoading(false);
   };
 
+  const [serverIP, setServerIP] = useState(DEFAULT_IP);
+  const [showSettings, setShowSettings] = useState(false);
+
+  const updateAPI = (ip) => {
+    API = `http://${ip}:8000`;
+    setServerIP(ip);
+  };
+
   return (
     <SafeAreaView style={styles.container} {...pan.panHandlers}>
       <StatusBar backgroundColor={C.bg} barStyle="light-content" />
@@ -488,10 +497,44 @@ export default function App() {
       <ActionModal visible={actionVisible} steps={actionSteps}
         result={actionResult} onClose={() => setActionVisible(false)} />
 
+      {/* Settings Modal */}
+      <Modal visible={showSettings} transparent animationType="slide">
+        <View style={{flex:1, backgroundColor:"#000510EE", justifyContent:"center", padding:20}}>
+          <Text style={{color:C.blue, fontFamily:"monospace", fontSize:14, letterSpacing:4, marginBottom:20}}>⚙️ SERVER SETTINGS</Text>
+          <Text style={{color:C.dim, fontFamily:"monospace", fontSize:11, marginBottom:8}}>TERMUX SERVER IP:</Text>
+          <TextInput
+            style={[styles.input, {marginBottom:16}]}
+            value={serverIP}
+            onChangeText={setServerIP}
+            placeholder="e.g. 10.139.106.157"
+            placeholderTextColor={C.dim}
+            keyboardType="numeric"
+          />
+          <Text style={{color:C.dim, fontFamily:"monospace", fontSize:10, marginBottom:16}}>
+            Termux mein run karo:{"
+"}ifconfig | grep inet
+          </Text>
+          <TouchableOpacity style={[styles.sendBtn, {width:"100%", borderRadius:8, height:46}]}
+            onPress={() => { updateAPI(serverIP); setShowSettings(false); loadData(); }}>
+            <Text style={{color:C.bg, fontFamily:"monospace", fontWeight:"bold"}}>CONNECT</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={{marginTop:12, alignItems:"center"}}
+            onPress={() => setShowSettings(false)}>
+            <Text style={{color:C.red, fontFamily:"monospace"}}>[ CANCEL ]</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
+
       <View style={styles.nav}>
-        {[{ l: "HUD", i: "⚡" }, { l: "CHAT", i: "💬" }, { l: "DASH", i: "📊" }].map((item, i) => (
-          <TouchableOpacity key={i} onPress={() => { haptic(); setScreen(i); }} style={styles.navBtn}>
-            <Text style={{ fontSize: 16 }}>{item.i}</Text>
+        {[{ l: "HUD", i: "⚡" }, { l: "CHAT", i: "💬" }, { l: "DASH", i: "📊" }, { l: "SET", i: "⚙️" }].map((item, i) => (
+          <TouchableOpacity key={i} 
+            onPress={() => { 
+              haptic(); 
+              if(i === 3) setShowSettings(true);
+              else setScreen(i); 
+            }} 
+            style={styles.navBtn}>
+            <Text style={{ fontSize: 14 }}>{item.i}</Text>
             <View style={[styles.dot, screen === i && styles.dotActive]} />
             <Text style={[styles.navLabel, screen === i && { color: C.blue }]}>{item.l}</Text>
           </TouchableOpacity>
