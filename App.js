@@ -511,8 +511,7 @@ export default function App() {
             keyboardType="numeric"
           />
           <Text style={{color:C.dim, fontFamily:"monospace", fontSize:10, marginBottom:16}}>
-            Termux mein run karo:{"
-"}ifconfig | grep inet
+            Termux mein run karo: ifconfig | grep inet
           </Text>
           <TouchableOpacity style={[styles.sendBtn, {width:"100%", borderRadius:8, height:46}]}
             onPress={() => { updateAPI(serverIP); setShowSettings(false); loadData(); }}>
