@@ -6,8 +6,8 @@ import {
 } from "react-native";
 
 const { width, height } = Dimensions.get("window");
-const DEFAULT_IP = "10.139.106.157";
-let API = `http://${DEFAULT_IP}:8000`;
+const GROQ_KEY = process.env.EXPO_PUBLIC_GROQ_KEY;
+const GROQ_API = "https://api.groq.com/openai/v1/chat/completions";
 
 const C = {
   bg: "#000510", blue: "#00D4FF", green: "#00FF88",
@@ -17,23 +17,95 @@ const C = {
 
 const haptic = () => Vibration.vibrate(50);
 
-// ===== API HELPER =====
+// ===== GROQ DIRECT =====
+const askGroq = async (message, system) => {
+  try {
+    const res = await fetch(GROQ_API, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${GROQ_KEY}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model: "llama-3.3-70b-versatile",
+        messages: [
+          { role: "system", content: system || "Tu JARVIS hai. Faizan ka best dost. Hinglish mein 2-3 lines mein jawab de." },
+          { role: "user", content: message }
+        ],
+        max_tokens: 300
+      })
+    });
+    const data = await res.json();
+    return data.choices[0].message.content;
+  } catch(e) { return "Error: " + e.message; }
+};
+
+const searchWeb = async (query) => {
+  try {
+    const res = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_html=1`);
+    const data = await res.json();
+    return data.Abstract || data.Answer || data.RelatedTopics?.[0]?.Text || "";
+  } catch { return ""; }
+};
+
+const getWeather = async () => {
+  try {
+    const res = await fetch("https://wttr.in/Kuwait?format=3");
+    return await res.text();
+  } catch { return "Kuwait weather unavailable"; }
+};
+
+const getNews = async () => {
+  try {
+    const res = await fetch("https://api.duckduckgo.com/?q=india+news+today&format=json&no_html=1");
+    const data = await res.json();
+    return data.RelatedTopics?.slice(0,4).map(t => t.Text).filter(Boolean) || ["JARVIS ONLINE"];
+  } catch { return ["JARVIS ONLINE", "ALL SYSTEMS OPERATIONAL"]; }
+};
+
 const api = {
   get: async (endpoint) => {
-    try {
-      const res = await fetch(`${API}${endpoint}`);
-      return await res.json();
-    } catch { return null; }
+    if (endpoint.includes("/weather")) {
+      const w = await getWeather();
+      return { weather: w };
+    }
+    if (endpoint.includes("/news")) {
+      const n = await getNews();
+      return { news: n };
+    }
+    if (endpoint.includes("/system")) {
+      return {
+        battery: { percentage: 0, status: "unknown", temperature: 0 },
+        ram: { percentage: 0 },
+        storage: "N/A",
+        time: new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Kuwait" }),
+        status: "online"
+      };
+    }
+    if (endpoint.includes("/memory/list")) return { memories: [], count: 0 };
+    if (endpoint.includes("/skills")) return { count: 47 };
+    return null;
   },
   post: async (endpoint, body) => {
-    try {
-      const res = await fetch(`${API}${endpoint}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body)
-      });
-      return await res.json();
-    } catch { return null; }
+    if (endpoint.includes("/ask")) {
+      const isSearch = /search|find|google|kya hai|who is/i.test(body.message);
+      let response;
+      if (isSearch) {
+        const searchResult = await searchWeb(body.message);
+        const prompt = searchResult 
+          ? `Web result: ${searchResult}
+
+User: ${body.message}
+
+Hinglish mein 2-3 lines mein batao:`
+          : body.message;
+        response = await askGroq(prompt);
+      } else {
+        response = await askGroq(body.message);
+      }
+      return { response };
+    }
+    return null;
   }
 };
 
